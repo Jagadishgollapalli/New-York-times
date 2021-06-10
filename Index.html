@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newyork times</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        body
+        {
+            background-color: rgb(247, 206, 206);
+        }
+        .active
+        {
+            background-color: rgb(8, 10, 14);
+        }
+        a:hover{
+          color: rgb(139, 11, 11);
+        }
+    </style>
+</head>
+<body>
+    <ul class="nav nav-pills  bg-dark justify-content-first p-2 list-inline sticky-top rounded" style="opacity: 1.0;">
+        <li class="nav-item mx-2"><input type="button" class="nav-link btn btn-link home active btn-lg" value="home"></li>
+        <li class="nav-item mx-2"><input type="button" class="nav-link btn btn-link arts btn-lg" value="arts"></li>
+        <li class="nav-item mx-2"><input type="button" class="nav-link btn btn-link science btn-lg" value="science"></li>
+        <li class="nav-item mx-2"><input type="button" class="nav-link btn btn-link us btn-lg" value="us"></li>
+        <li class="nav-item mx-2"><input type="button" class="nav-link btn btn-link world btn-lg" value="world"></li>
+    </ul>
+    <div class="container-fluid">
+        <div class="row"></div>
+    </div>
+    <script>
+        function Totalcontent(val)
+        {
+            document.querySelector('.row').innerHTML = ``;
+            fetch(`https://api.nytimes.com/svc/topstories/v2/${val}.json?api-key=mBeIhvBuJ2bkJJjbxkg7BxHPNm0PwO3M`).then(res=>res.json()).then(data=>{
+                data.results.forEach(v=>{
+                    let parent = document.createElement('div');
+                    document.querySelector('.row').appendChild(parent);
+                    parent.className = 'parent mt-3 align-items-justify bg-warning';
+                    let thumbnail = document.createElement('img');
+                    parent.appendChild(thumbnail);
+                    let card = document.createElement('div');
+                    parent.appendChild(card);
+                    let card_body = document.createElement('div');
+                    card.appendChild(card_body);
+                    let card_title = document.createElement('h4');
+                    card_body.appendChild(card_title);
+                    let card_subtitle = document.createElement('h5');
+                    card_body.appendChild(card_subtitle);
+                    card_text    = document.createElement('ul');
+                    card_body.appendChild(card_text);
+                    card_link   = document.createElement('a');
+                    card_body.appendChild(card_link);
+                    parent.setAttribute('data-value',data.results.indexOf(v));
+                    card.className = 'col-md-5 ';
+                    card_body.className = 'card-body';
+                    card_title.className = 'card-title';
+                    card_title.textContent = v.title;
+                    card_subtitle.className = 'card-subtitle text-muted';
+                    card_subtitle.textContent = v.created_date.split('').slice(0,10).join('');
+                    card_text.className = 'card-text text-monospace text-wrap list-unstyled';
+                    card_text.innerHTML =
+                    `<li>Abstract : ${v.abstract}</li>
+                    <li>Byline : ${v.byline}</li>
+                    <li>Section : ${v.section}</li>
+                    <li>Item-Type : ${v.item_type}</li>
+                    `
+                    card_link.className = 'card-link';
+                    card_link.href = v.url;
+                    card_link.target = '_blank'
+                    card_link.textContent = `View full article`
+                    thumbnail.className = ' col-md-5 img-thumbnail float-right mt-0 w-50 align-self-center';
+                    thumbnail.src = v.multimedia[4].url;
+                    let query = window.matchMedia("(max-width: 800px)");
+                    query.addListener(change);
+                    function change(query)
+                    {
+                        if(query.matches)
+                        {
+                            parent.innerHTML = ``;
+                            let card = document.createElement('div');
+                            parent.appendChild(card);
+                            let thumbnail = document.createElement('img');
+                            card.appendChild(thumbnail);
+                            let card_body = document.createElement('div');
+                            card.appendChild(card_body);
+                            let card_title = document.createElement('h4');
+                            card_body.appendChild(card_title);
+                            let card_subtitle = document.createElement('h5');
+                            card_body.appendChild(card_subtitle);
+                            card_text    = document.createElement('ul');
+                            card_body.appendChild(card_text);
+                            card_link   = document.createElement('a');
+                            card_body.appendChild(card_link);
+                            thumbnail.className = 'card-img-top img-responsive';
+                            thumbnail.src = v.multimedia[4].url;                            
+                            card.className = 'card';
+                            card_body.className = 'card-body';
+                            card_title.className = 'card-title';
+                            card_title.textContent = v.title;
+                            card_subtitle.className = 'card-subtitle text-muted';
+                            card_subtitle.textContent = v.created_date.split('').slice(0,10).join('');
+                            card_text.className = 'card-text text-monospace text-wrap list-unstyled';
+                            card_text.innerHTML =
+                            `<li>Abstract : ${v.abstract}</li>
+                            <li>Byline : ${v.byline}</li>
+                            <li>Section : ${v.section}</li>
+                            <li>Item-Type : ${v.item_type}</li>
+                            `
+                            card_link.className = 'card-link';
+                            card_link.href = v.url;
+                            card_link.target = '_blank'
+                            card_link.textContent = `View full article`;
+                            document.querySelectorAll('.nav-item').forEach(l=>{
+                                l.classList.remove('mx-2');
+                                l.firstChild.classList.remove('btn-lg');
+                                l.firstChild.classList.add('btn-md');
+
+                            })
+                        }
+                        else Totalcontent(val);
+                    }
+
+                })
+            })
+        }
+        let val = 'home';
+        Totalcontent(val);
+        document.querySelector('.nav').addEventListener('click',event=>{  
+            document.querySelector('.'+val).classList.remove('active');
+            event.target.className += ' active';
+            if(event.target.value != undefined)
+            {
+                val = event.target.value;
+                Totalcontent(val);
+            }  
+        });
+    </script>
+    </body>
+    </html>
